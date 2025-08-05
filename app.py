@@ -1,21 +1,20 @@
 from flask import Flask, request, jsonify
-import joblib
-import numpy as np
+import pickle
 
 app = Flask(__name__)
 
 # Load the trained model
-model = joblib.load('model.pkl')
+with open('model.pkl', 'rb') as f:
+    model = pickle.load(f)
 
 @app.route('/')
 def home():
-    return "ML model is live on Railway!"
+    return "Model Deployment is Running!"
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    data = request.json
-    features = np.array(data['features']).reshape(1, -1)
-    prediction = model.predict(features)
+    data = request.get_json(force=True)
+    prediction = model.predict([data['features']])
     return jsonify({'prediction': prediction.tolist()})
 
 if __name__ == '__main__':
